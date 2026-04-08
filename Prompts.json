@@ -3,6 +3,10 @@
     "summary": "This is jsut to see if it works correctly",
     "prompt": "fuck IT and theyr security BS OvO"
   },
+  "Shrnovač mailů": {
+    "summary": "Prostě ti řekne krátce co je v mailu :D",
+    "prompt": "Please summarize this email, state the main intent of this email, and suggest the following actions in response to it."
+  },
   "Email Polisher": {
     "summary": "Turns rough notes into professional, corporate-ready emails.",
     "prompt": "Act as a communications expert. Rewrite the following text to be professional, clear, and concise. Ensure the tone is appropriate for a corporate environment while maintaining the original intent."
