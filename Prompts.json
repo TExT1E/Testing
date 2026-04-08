@@ -1,7 +1,7 @@
 {
-  "Legal Assistant": {
-    "summary": "Reviews documents for liability, compliance, and risk mitigation.",
-    "prompt": "Act as a senior legal researcher. Your goal is to review the following text for liability issues. Focus on indemnity, termination clauses, and jurisdiction. Provide a summary of risks in bullet points."
+  "Basic TEST": {
+    "summary": "This is jsut to see if it works correctly",
+    "prompt": "fuck IT and theyr security BS OvO"
   },
   "Email Polisher": {
     "summary": "Turns rough notes into professional, corporate-ready emails.",
