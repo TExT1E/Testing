@@ -1,22 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firm AI Personas | Dark Mode</title>
-    <style>
+<style>
         :root {
             --bg-dark: #0f111a;
             --card-bg: #1a1c2e;
             --neon-pink: #ff00ff;
             --neon-purple: #9d00ff;
-            --text-gray: #b0b0b0;
         }
 
         body {
             background-color: var(--bg-dark);
             color: white;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 40px;
             display: flex;
@@ -30,47 +23,45 @@
             background: linear-gradient(to right, var(--neon-pink), var(--neon-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
         }
 
         #container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* The 3x Matrix */
-            gap: 25px;
-            max-width: 1000px;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 40px; /* Increased gap to prevent halo merging */
+            max-width: 1100px;
             width: 100%;
         }
 
         .prompt-card {
             position: relative;
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 2px; /* Space for the RGB border */
-            overflow: visible;
-            transition: transform 0.3s ease;
+            border-radius: 15px;
+            padding: 3px; /* The thickness of the RGB halo */
+            z-index: 1;
+            /* Outer glow to keep buttons distinct */
+            box-shadow: 0 0 15px rgba(157, 0, 255, 0.2);
         }
 
-        .prompt-card:hover {
-            transform: translateY(-5px);
-        }
-
-        /* The Animated RGB Border */
+        /* The Constant RGB Halo */
         .prompt-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 12px;
-            background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple), var(--neon-pink));
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 17px;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple), #00d4ff, var(--neon-pink));
             background-size: 400%;
             z-index: -1;
-            animation: move-glow 8s linear infinite;
-            opacity: 0.6;
+            animation: move-glow 12s linear infinite;
+            filter: blur(5px); /* This creates the "Halo" effect */
+            opacity: 0.8;
         }
 
         .card-content {
             background: var(--card-bg);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 30px 20px;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -78,31 +69,38 @@
             align-items: center;
             text-align: center;
             cursor: pointer;
-            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .card-content:hover {
+            background: #252841; /* Slightly lighter on hover */
         }
 
         .prompt-name {
-            font-weight: 600;
-            font-size: 1.1rem;
-            pointer-events: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
         }
 
-        /* Hover Tooltip/Explanation */
+        /* Explanation Tooltip */
         .explanation {
             position: absolute;
-            bottom: 110%;
+            bottom: 115%;
             left: 50%;
             transform: translateX(-50%);
-            width: 200px;
-            background: rgba(0, 0, 0, 0.9);
-            color: #fff;
-            padding: 10px;
-            border-radius: 8px;
+            width: 220px;
+            background: rgba(10, 10, 15, 0.95);
+            color: #d1d1d1;
+            padding: 12px;
+            border-radius: 10px;
             font-size: 0.85rem;
             border: 1px solid var(--neon-purple);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
             z-index: 100;
             pointer-events: none;
         }
@@ -110,9 +108,9 @@
         .card-content:hover .explanation {
             opacity: 1;
             visibility: visible;
+            bottom: 125%; /* Slighly lifts up on hover */
         }
 
-        /* Button Pulse */
         @keyframes move-glow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -121,60 +119,14 @@
 
         .copied-msg {
             position: fixed;
-            bottom: 20px;
+            top: 20px;
             background: var(--neon-pink);
             color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
+            padding: 12px 25px;
+            border-radius: 30px;
             display: none;
-            box-shadow: 0 0 15px var(--neon-pink);
+            font-weight: bold;
+            box-shadow: 0 0 20px var(--neon-pink);
+            z-index: 1000;
         }
     </style>
-</head>
-<body>
-
-    <h2>Firm AI Personas</h2>
-    <div id="container"></div>
-    <div id="copiedStatus" class="copied-msg">Prompt Copied!</div>
-
-    <script>
-        const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/TExT1E/Testing/main/Prompts.json';
-        
-        async function loadPrompts() {
-            try {
-                const res = await fetch(GITHUB_RAW_URL);
-                const data = await res.json();
-                const container = document.getElementById('container');
-                
-                for (let key in data) {
-                    const card = document.createElement('div');
-                    card.className = 'prompt-card';
-                    
-                    // Simple logic to show first 40 chars as explanation
-                    const summary = data[key].substring(0, 80) + "...";
-
-                    card.innerHTML = `
-                        <div class="card-content" onclick="copyText('${key}', \`${data[key]}\`)">
-                            <div class="explanation"><strong>Logic:</strong> ${summary}</div>
-                            <div class="prompt-name">${key}</div>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                }
-            } catch (e) {
-                document.getElementById('container').innerText = "Error loading prompts. Check GitHub link.";
-            }
-        }
-
-        function copyText(name, text) {
-            navigator.clipboard.writeText(text);
-            const msg = document.getElementById('copiedStatus');
-            msg.innerText = name + " Copied!";
-            msg.style.display = 'block';
-            setTimeout(() => { msg.style.display = 'none'; }, 2000);
-        }
-
-        loadPrompts();
-    </script>
-</body>
-</html>
