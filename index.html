@@ -1,198 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firm AI Personas | Neon Matrix</title>
-    <style>
-        :root {
-            --bg-dark: #0f111a;
-            --card-bg: #1a1c2e;
-            --neon-pink: #ff00ff;
-            --neon-purple: #9d00ff;
-            --neon-blue: #00d4ff;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        h2 {
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            background: linear-gradient(to right, var(--neon-pink), var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 60px;
-            font-size: 2rem;
-        }
-
-        #container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 50px; 
-            max-width: 1100px;
-            width: 100%;
-        }
-
-        .prompt-card {
-            position: relative;
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 3px; 
-            z-index: 1;
-        }
-
-        /* The Constant RGB Halo Effect */
-        .prompt-card::before {
-            content: '';
-            position: absolute;
-            top: -2px; left: -2px; right: -2px; bottom: -2px;
-            border-radius: 17px;
-            background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple), var(--neon-blue), var(--neon-pink));
-            background-size: 400%;
-            z-index: -1;
-            animation: move-glow 10s linear infinite;
-            filter: blur(8px); 
-            opacity: 0.9;
-        }
-
-        .card-content {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 40px 20px;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .card-content:hover {
-            background: #252841; 
-        }
-
-        .prompt-name {
-            font-weight: 700;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-            color: #ffffff;
-            pointer-events: none;
-        }
-
-        /* Hover Tooltip */
-        .explanation {
-            position: absolute;
-            bottom: 120%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 240px;
-            background: rgba(5, 5, 10, 0.95);
-            color: #e0e0e0;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            border: 1px solid var(--neon-purple);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 100;
-            pointer-events: none;
-            line-height: 1.4;
-        }
-
-        .card-content:hover .explanation {
-            opacity: 1;
-            visibility: visible;
-            bottom: 130%; 
-        }
-
-        @keyframes move-glow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .copied-msg {
-            position: fixed;
-            top: 20px;
-            background: linear-gradient(to right, var(--neon-pink), var(--neon-purple));
-            color: white;
-            padding: 12px 30px;
-            border-radius: 50px;
-            display: none;
-            font-weight: bold;
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
-</head>
-<body>
-
-    <h2>Firm AI Personas</h2>
-    <div id="container"></div>
-    <div id="copiedStatus" class="copied-msg">Copied!</div>
-
-    <script>
-        // Forces fresh data every time
-        const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/TExT1E/Testing/main/Prompts.json?t=' + Date.now();
-        
-        async function loadPrompts() {
-            try {
-                const res = await fetch(GITHUB_RAW_URL);
-                if (!res.ok) throw new Error('Failed to fetch');
-                const data = await res.json();
-                const container = document.getElementById('container');
+<script>
+    const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/TExT1E/Testing/main/Prompts.json?t=' + Date.now();
+    
+    async function loadPrompts() {
+        try {
+            const res = await fetch(GITHUB_RAW_URL);
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            const container = document.getElementById('container');
+            
+            for (let key in data) {
+                const card = document.createElement('div');
+                card.className = 'prompt-card';
                 
-                for (let key in data) {
-                    const card = document.createElement('div');
-                    card.className = 'prompt-card';
-                    
-                    // Show a snippet in the hover tooltip
-                    const snippet = data[key].length > 120 ? data[key].substring(0, 120) + "..." : data[key];
+                // Use the 'summary' field for the hover tooltip
+                const displaySummary = data[key].summary;
+                // Store the 'prompt' field for the clipboard
+                const fullPrompt = data[key].prompt;
 
-                    card.innerHTML = `
-                        <div class="card-content" onclick="copyText('${key}', \`${data[key]}\`)">
-                            <div class="explanation"><strong>Persona Logic:</strong><br>${snippet}</div>
-                            <div class="prompt-name">${key}</div>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                }
-            } catch (e) {
-                document.getElementById('container').innerHTML = `<p style="color:red">Error loading Prompts.json. Check your GitHub file syntax.</p>`;
+                card.innerHTML = `
+                    <div class="card-content" onclick="copyText('${key}', \`${fullPrompt}\`)">
+                        <div class="explanation"><strong>What this does:</strong><br>${displaySummary}</div>
+                        <div class="prompt-name">${key}</div>
+                    </div>
+                `;
+                container.appendChild(card);
             }
+        } catch (e) {
+            document.getElementById('container').innerHTML = `<p style="color:red">Error loading JSON. Ensure it follows the new { summary, prompt } format.</p>`;
         }
+    }
 
-        function copyText(name, text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const msg = document.getElementById('copiedStatus');
-                msg.innerText = name + " Copied!";
-                msg.style.display = 'block';
-                setTimeout(() => { msg.style.display = 'none'; }, 2000);
-            });
-        }
+    function copyText(name, text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const msg = document.getElementById('copiedStatus');
+            msg.innerText = name + " Prompt Copied!";
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 2000);
+        });
+    }
 
-        loadPrompts();
-    </script>
-</body>
-</html>
+    loadPrompts();
+</script>
