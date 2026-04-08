@@ -1,43 +1,235 @@
-<script>
-    const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/TExT1E/Testing/main/Prompts.json?t=' + Date.now();
-    
-    async function loadPrompts() {
-        try {
-            const res = await fetch(GITHUB_RAW_URL);
-            if (!res.ok) throw new Error('Failed to fetch');
-            const data = await res.json();
-            const container = document.getElementById('container');
-            
-            for (let key in data) {
-                const card = document.createElement('div');
-                card.className = 'prompt-card';
-                
-                // Use the 'summary' field for the hover tooltip
-                const displaySummary = data[key].summary;
-                // Store the 'prompt' field for the clipboard
-                const fullPrompt = data[key].prompt;
-
-                card.innerHTML = `
-                    <div class="card-content" onclick="copyText('${key}', \`${fullPrompt}\`)">
-                        <div class="explanation"><strong>What this does:</strong><br>${displaySummary}</div>
-                        <div class="prompt-name">${key}</div>
-                    </div>
-                `;
-                container.appendChild(card);
-            }
-        } catch (e) {
-            document.getElementById('container').innerHTML = `<p style="color:red">Error loading JSON. Ensure it follows the new { summary, prompt } format.</p>`;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firm AI Personas | Neon Matrix</title>
+    <style>
+        :root {
+            --bg-dark: #0f111a;
+            --card-bg: #1a1c2e;
+            --neon-pink: #ff00ff;
+            --neon-purple: #9d00ff;
+            --neon-blue: #00d4ff;
         }
-    }
 
-    function copyText(name, text) {
-        navigator.clipboard.writeText(text).then(() => {
-            const msg = document.getElementById('copiedStatus');
-            msg.innerText = name + " Prompt Copied!";
-            msg.style.display = 'block';
-            setTimeout(() => { msg.style.display = 'none'; }, 2000);
-        });
-    }
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-    loadPrompts();
-</script>
+        h2 {
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 60px;
+            font-size: 2.2rem;
+            filter: drop-shadow(0 0 10px rgba(157, 0, 255, 0.3));
+        }
+
+        #container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 50px; 
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* The Card Container */
+        .prompt-card {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 3px; 
+            z-index: 1;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .prompt-card:hover {
+            transform: scale(1.05);
+        }
+
+        /* The Constant RGB Halo Animation */
+        .prompt-card::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple), var(--neon-blue), var(--neon-pink));
+            background-size: 400%;
+            z-index: -1;
+            animation: move-glow 10s linear infinite;
+            filter: blur(10px); 
+            opacity: 0.85;
+        }
+
+        /* Inner Card Styling */
+        .card-content {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 45px 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+        .card-content:hover {
+            background: #252841; 
+        }
+
+        .prompt-name {
+            font-weight: 800;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            color: #ffffff;
+            pointer-events: none;
+            text-transform: capitalize;
+        }
+
+        /* Hover Tooltip (Explanation) */
+        .explanation {
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 260px;
+            background: rgba(5, 5, 10, 0.98);
+            color: #efefef;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            border: 1px solid var(--neon-purple);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 100;
+            pointer-events: none;
+            line-height: 1.5;
+        }
+
+        .card-content:hover .explanation {
+            opacity: 1;
+            visibility: visible;
+            bottom: 135%; 
+        }
+
+        /* RGB Background Animation */
+        @keyframes move-glow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Success Message Popup */
+        .copied-msg {
+            position: fixed;
+            top: 30px;
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-purple));
+            color: white;
+            padding: 15px 35px;
+            border-radius: 50px;
+            display: none;
+            font-weight: bold;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+            z-index: 1000;
+            animation: slideDown 0.4s ease forwards;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 900px) {
+            #container { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            #container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Firm AI Personas</h2>
+    <div id="container"></div>
+    <div id="copiedStatus" class="copied-msg">Copied!</div>
+
+    <script>
+        // Use Date.now to ensure we always get the absolute latest JSON from GitHub
+        const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/TExT1E/Testing/main/Prompts.json?t=' + Date.now();
+        
+        async function loadPrompts() {
+            try {
+                const res = await fetch(GITHUB_RAW_URL);
+                if (!res.ok) throw new Error('Could not load JSON file');
+                const data = await res.json();
+                const container = document.getElementById('container');
+                
+                container.innerHTML = ''; // Clear loading text
+
+                for (let key in data) {
+                    const card = document.createElement('div');
+                    card.className = 'prompt-card';
+                    
+                    // Pulling the summary for the UI and the prompt for the hidden copy function
+                    const summaryText = data[key].summary || "No description provided.";
+                    const clipboardText = data[key].prompt || "";
+
+                    card.innerHTML = `
+                        <div class="card-content" onclick="copyText('${key}', \`${clipboardText}\`)">
+                            <div class="explanation">
+                                <strong>Tool Goal:</strong><br>
+                                ${summaryText}
+                            </div>
+                            <div class="prompt-name">${key}</div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('container').innerHTML = `
+                    <p style="color:var(--neon-pink); grid-column: 1 / -1;">
+                        ⚠️ Error Loading Prompts: Verify your GitHub Prompts.json formatting.
+                    </p>`;
+            }
+        }
+
+        function copyText(name, text) {
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                const msg = document.getElementById('copiedStatus');
+                msg.innerText = "🚀 " + name + " Prompt Ready!";
+                msg.style.display = 'block';
+                
+                // Vibrate on mobile for feedback if supported
+                if (navigator.vibrate) navigator.vibrate(50);
+
+                setTimeout(() => { 
+                    msg.style.display = 'none'; 
+                }, 2500);
+            });
+        }
+
+        // Initialize the board
+        loadPrompts();
+    </script>
+</body>
+</html>
