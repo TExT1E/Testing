@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firm AI Personas</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
+        .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        button { background: #0078d4; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #005a9e; }
+        .copied { background: #107c10 !important; }
+    </style>
+</head>
+<body>
+    <h2>Firm AI Personas</h2>
+    <div id="container">Loading prompts...</div>
+
+    <script>
+        const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/TExT1E/Testing/main/Prompts.json';
+        
+        fetch(GITHUB_RAW_URL)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('container');
+                container.innerHTML = '';
+                for (let key in data) {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.innerHTML = `<span><strong>${key}</strong></span><button onclick="copyText(this, \`${data[key]}\`)">Copy Prompt</button>`;
+                    container.appendChild(div);
+                }
+            });
+
+        function copyText(btn, text) {
+            navigator.clipboard.writeText(text);
+            const originalText = btn.innerText;
+            btn.innerText = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { 
+                btn.innerText = originalText; 
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
