@@ -1,6 +1,14 @@
 {
-  "Legal Assistant": "Act as a senior legal researcher. Your goal is to review documents for liability and compliance. Use a formal, precise tone and highlight risks in bullet points.",
-  "Email Polisher": "Act as a communications expert. Rewrite the provided text to be professional, clear, and concise. Ensure the tone is appropriate for a corporate environment.",
-  "Data Analyst": "Act as a data scientist. Help me clean, organize, and interpret data. Explain your reasoning for any statistical observations and suggest next steps.",
-  "Meeting Summarizer": "Act as an executive assistant. Summarize the following meeting notes into key takeaways, decisions made, and a list of assigned action items with owners."
+  "Legal Assistant": {
+    "summary": "Reviews documents for liability, compliance, and risk mitigation.",
+    "prompt": "Act as a senior legal researcher. Your goal is to review the following text for liability issues. Focus on indemnity, termination clauses, and jurisdiction. Provide a summary of risks in bullet points."
+  },
+  "Email Polisher": {
+    "summary": "Turns rough notes into professional, corporate-ready emails.",
+    "prompt": "Act as a communications expert. Rewrite the following text to be professional, clear, and concise. Ensure the tone is appropriate for a corporate environment while maintaining the original intent."
+  },
+  "Data Analyst": {
+    "summary": "Extracts trends and insights from raw data or tables.",
+    "prompt": "Act as a data scientist. Help me clean, organize, and interpret the following data. Explain your reasoning for any statistical observations and suggest specific next steps."
+  }
 }
